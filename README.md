@@ -6,11 +6,11 @@
 
 1. [src/types.ts](/src/types.ts) - 核心类型定义，了解项目的数据结构
 2. [src/constants.ts](/src/constants.ts) - 常量定义，包括日志级别和类型
-3. [src/consola.ts](/src/consola.ts) * - 核心类，实现了主要的日志功能
-4. [src/index.ts](/src/index.ts) * - 主入口文件，提供公共API
-5. [src/shared.ts](/src/shared.ts) * - 共享功能和实用工具
-6. [src/reporters/basic.ts](/src/reporters/basic.ts) * - 基础报告器实现
-7. [src/reporters/fancy.ts](/src/reporters/fancy.ts) * - 美化报告器实现
+3. [src/consola.ts](/src/consola.ts) - 核心类，实现了主要的日志功能
+4. [src/index.ts](/src/index.ts) - 主入口文件，提供公共API
+5. [src/shared.ts](/src/shared.ts) - 共享功能和实用工具
+6. [src/reporters/basic.ts](/src/reporters/basic.ts) - 基础报告器实现
+7. [src/reporters/fancy.ts](/src/reporters/fancy.ts) - 美化报告器实现
 8. [src/reporters/browser.ts](/src/reporters/browser.ts) * - 浏览器报告器实现
 9. [src/utils/log.ts](/src/utils/log.ts) * - 日志相关工具函数
 10. [src/utils/format.ts](/src/utils/format.ts) * - 格式化工具函数

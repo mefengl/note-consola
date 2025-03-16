@@ -1,3 +1,12 @@
+/**
+ * 🎮 Consola 核心类文件
+ * 想象这是一个超级日志游戏机！它可以：
+ * 1. 显示不同类型的消息（就像游戏里的提示、警告、错误）
+ * 2. 暂停和继续显示消息（就像游戏的暂停功能）
+ * 3. 可以装扮消息（让消息显示得更漂亮）
+ * 4. 可以控制消息的重要程度（就像游戏里的难度等级）
+ */
+
 import { defu } from "defu";
 import { LogTypes, LogType, LogLevel } from "./constants";
 import { isLogObj } from "./utils/log";
@@ -9,35 +18,53 @@ import type {
 } from "./types";
 import type { PromptOptions } from "./prompt";
 
+/**
+ * 🎮 全局暂停开关
+ * 就像游戏的暂停按钮，当设为true时，所有新的日志都会先存起来，等恢复时再显示
+ */
 let paused = false;
+
+/**
+ * 📦 消息暂存箱
+ * 当游戏暂停时，新的消息会被放在这个箱子里
+ */
 const queue: any[] = [];
 
 /**
- * Consola class for logging management with support for pause/resume, mocking and customisable reporting.
- * Provides flexible logging capabilities including level-based logging, custom reporters and integration options.
- *
- * @class Consola
+ * 🎮 Consola主类
+ * 这就像是一台超级日志游戏机，可以显示各种各样的消息！
  */
 export class Consola {
+  /**
+   * ⚙️ 配置选项
+   * 就像游戏的设置菜单，可以调整各种功能
+   */
   options: ConsolaOptions;
 
+  /**
+   * 📝 最后一条日志的记录
+   * 记住最后显示的消息，用来控制重复的消息不会刷屏
+   */
   _lastLog: {
-    serialized?: string;
-    object?: LogObject;
-    count?: number;
-    time?: Date;
-    timeout?: ReturnType<typeof setTimeout>;
+    serialized?: string;    // 消息的编码版本
+    object?: LogObject;     // 完整的消息对象
+    count?: number;         // 重复次数
+    time?: Date;           // 记录时间
+    timeout?: ReturnType<typeof setTimeout>;  // 定时器
   };
 
+  /**
+   * 🎭 模拟函数
+   * 在测试时使用，就像彩排一样，不是真的显示
+   */
   _mockFn?: ConsolaOptions["mockFn"];
 
   /**
-   * Creates an instance of Consola with specified options or defaults.
-   *
-   * @param {Partial<ConsolaOptions>} [options={}] - Configuration options for the Consola instance.
+   * 🎮 创建一个新的游戏机实例
+   * @param options 游戏机的设置，可以调整显示效果、等级等
    */
   constructor(options: Partial<ConsolaOptions> = {}) {
-    // Options
+    // 初始化设置
     const types = options.types || LogTypes;
     this.options = defu(
       <ConsolaOptions>{
@@ -48,26 +75,28 @@ export class Consola {
       },
       <Partial<ConsolaOptions>>{
         types: LogTypes,
-        throttle: 1000,
-        throttleMin: 5,
+        throttle: 1000,      // 控制消息显示的间隔（毫秒）
+        throttleMin: 5,      // 最少显示多少条重复消息
         formatOptions: {
-          date: true,
-          colors: false,
-          compact: true,
+          date: true,        // 显示时间
+          colors: false,     // 是否使用彩色
+          compact: true,     // 是否紧凑显示
         },
       },
     );
 
-    // Create logger functions for current instance
+    // 创建各种类型的日志函数
     for (const type in types) {
       const defaults: InputLogObject = {
         type: type as LogType,
         ...this.options.defaults,
         ...types[type as LogType],
       };
+      // 创建普通版本的日志函数
       // @ts-expect-error
       (this as unknown as ConsolaInstance)[type as LogType] =
         this._wrapLogFn(defaults);
+      // 创建原始版本的日志函数
       // @ts-expect-error
       (this as unknown as ConsolaInstance)[type].raw = this._wrapLogFn(
         defaults,
@@ -75,28 +104,26 @@ export class Consola {
       );
     }
 
-    // Use _mockFn if is set
+    // 如果设置了模拟函数，就启用模拟模式
     if (this.options.mockFn) {
       this.mockTypes();
     }
 
-    // Track of last log
+    // 初始化最后日志记录
     this._lastLog = {};
   }
 
   /**
-   * Gets the current log level of the Consola instance.
-   *
-   * @returns {number} The current log level.
+   * 📊 获取当前的日志级别
+   * 就像获取游戏的难度等级
    */
   get level() {
     return this.options.level;
   }
 
   /**
-   * Sets the minimum log level that will be output by the instance.
-   *
-   * @param {number} level - The new log level to set.
+   * 📊 设置新的日志级别
+   * 就像调整游戏的难度等级
    */
   set level(level) {
     this.options.level = _normalizeLogLevel(
@@ -107,13 +134,8 @@ export class Consola {
   }
 
   /**
-   * Displays a prompt to the user and returns the response.
-   * Throw an error if `prompt` is not supported by the current configuration.
-   *
-   * @template T
-   * @param {string} message - The message to display in the prompt.
-   * @param {T} [opts] - Optional options for the prompt. See {@link PromptOptions}.
-   * @returns {promise<T>} A promise that infer with the prompt options. See {@link PromptOptions}.
+   * 💭 显示交互式提示
+   * 就像游戏里和玩家对话，等待玩家的选择
    */
   prompt<T extends PromptOptions>(message: string, opts?: T) {
     if (!this.options.prompt) {
@@ -123,29 +145,23 @@ export class Consola {
   }
 
   /**
-   * Creates a new instance of Consola, inheriting options from the current instance, with possible overrides.
-   *
-   * @param {Partial<ConsolaOptions>} options - Optional overrides for the new instance. See {@link ConsolaOptions}.
-   * @returns {ConsolaInstance} A new Consola instance. See {@link ConsolaInstance}.
+   * 🎮 创建一个新的游戏机实例
+   * 就像复制一个游戏机，但可以有不同的设置
    */
   create(options: Partial<ConsolaOptions>): ConsolaInstance {
     const instance = new Consola({
       ...this.options,
       ...options,
     }) as ConsolaInstance;
-
     if (this._mockFn) {
       instance.mockTypes(this._mockFn);
     }
-
     return instance;
   }
 
   /**
-   * Creates a new Consola instance with the specified default log object properties.
-   *
-   * @param {InputLogObject} defaults - Default properties to include in any log from the new instance. See {@link InputLogObject}.
-   * @returns {ConsolaInstance} A new Consola instance. See {@link ConsolaInstance}.
+   * ⚙️ 创建带默认设置的新实例
+   * 就像创建一个预设好的游戏存档
    */
   withDefaults(defaults: InputLogObject): ConsolaInstance {
     return this.create({
@@ -158,10 +174,8 @@ export class Consola {
   }
 
   /**
-   * Creates a new Consola instance with a specified tag, which will be included in every log.
-   *
-   * @param {string} tag - The tag to include in each log of the new instance.
-   * @returns {ConsolaInstance} A new Consola instance. See {@link ConsolaInstance}.
+   * 🏷️ 创建带标签的新实例
+   * 就像给游戏角色起个名字，之后的消息都会带着这个名字
    */
   withTag(tag: string): ConsolaInstance {
     return this.withDefaults({
@@ -172,11 +186,8 @@ export class Consola {
   }
 
   /**
-   * Adds a custom reporter to the Consola instance.
-   * Reporters will be called for each log message, depending on their implementation and log level.
-   *
-   * @param {ConsolaReporter} reporter - The reporter to add. See {@link ConsolaReporter}.
-   * @returns {Consola} The current Consola instance.
+   * 📺 添加新的显示器
+   * 就像给游戏机接上一个新的显示屏
    */
   addReporter(reporter: ConsolaReporter) {
     this.options.reporters.push(reporter);
@@ -184,11 +195,8 @@ export class Consola {
   }
 
   /**
-   * Removes a custom reporter from the Consola instance.
-   * If no reporter is specified, all reporters will be removed.
-   *
-   * @param {ConsolaReporter} reporter - The reporter to remove. See {@link ConsolaReporter}.
-   * @returns {Consola} The current Consola instance.
+   * 🔌 移除显示器
+   * 就像拔掉一个显示屏
    */
   removeReporter(reporter: ConsolaReporter) {
     if (reporter) {
@@ -203,36 +211,43 @@ export class Consola {
   }
 
   /**
-   * Replaces all reporters of the Consola instance with the specified array of reporters.
-   *
-   * @param {ConsolaReporter[]} reporters - The new reporters to set. See {@link ConsolaReporter}.
-   * @returns {Consola} The current Consola instance.
+   * 🔄 替换所有显示器
+   * 就像换掉所有的显示屏
    */
   setReporters(reporters: ConsolaReporter[]) {
     this.options.reporters = Array.isArray(reporters) ? reporters : [reporters];
     return this;
   }
 
+  /**
+   * 🔗 包装所有输出
+   * 让所有消息都通过我们的游戏机显示
+   */
   wrapAll() {
     this.wrapConsole();
     this.wrapStd();
   }
 
+  /**
+   * 🔙 恢复所有输出
+   * 恢复到原来的显示方式
+   */
   restoreAll() {
     this.restoreConsole();
     this.restoreStd();
   }
 
   /**
-   * Overrides console methods with Consola logging methods for consistent logging.
+   * 🎮 接管控制台
+   * 让普通的console消息也变得好看
    */
   wrapConsole() {
     for (const type in this.options.types) {
-      // Backup original value
+      // 备份原始函数
       if (!(console as any)["__" + type]) {
         (console as any)["__" + type] = (console as any)[type];
       }
-      // Override
+      // 替换为我们的函数
       (console as any)[type] = (this as unknown as ConsolaInstance)[
         type as LogType
       ].raw;
@@ -240,11 +255,11 @@ export class Consola {
   }
 
   /**
-   * Restores the original console methods, removing Consola overrides.
+   * 🔙 恢复控制台
+   * 恢复普通的console显示方式
    */
   restoreConsole() {
     for (const type in this.options.types) {
-      // Restore if backup is available
       if ((console as any)["__" + type]) {
         (console as any)[type] = (console as any)["__" + type];
         delete (console as any)["__" + type];
@@ -253,42 +268,49 @@ export class Consola {
   }
 
   /**
-   * Overrides standard output and error streams to redirect them through Consola.
+   * 📺 接管标准输出
+   * 让系统的输出也变得好看
    */
   wrapStd() {
     this._wrapStream(this.options.stdout, "log");
     this._wrapStream(this.options.stderr, "log");
   }
 
+  /**
+   * 🔌 包装输出流
+   * 让某个显示通道变得好看
+   */
   _wrapStream(stream: NodeJS.WriteStream | undefined, type: LogType) {
     if (!stream) {
       return;
     }
-
-    // Backup original value
+    // 备份原始写入函数
     if (!(stream as any).__write) {
       (stream as any).__write = stream.write;
     }
-
-    // Override
+    // 替换为我们的函数
     (stream as any).write = (data: any) => {
       (this as unknown as ConsolaInstance)[type].raw(String(data).trim());
     };
   }
 
   /**
-   * Restores the original standard output and error streams, removing the Consola redirection.
+   * 🔙 恢复标准输出
+   * 恢复系统原来的输出方式
    */
   restoreStd() {
     this._restoreStream(this.options.stdout);
     this._restoreStream(this.options.stderr);
   }
 
+  /**
+   * 🔌 恢复输出流
+   * 恢复某个显示通道的原始状态
+   */
   _restoreStream(stream?: NodeJS.WriteStream) {
     if (!stream) {
       return;
     }
-
     if ((stream as any).__write) {
       stream.write = (stream as any).__write;
       delete (stream as any).__write;
@@ -296,19 +318,20 @@ export class Consola {
   }
 
   /**
-   * Pauses logging, queues incoming logs until resumed.
+   * ⏸️ 暂停日志
+   * 就像按下游戏的暂停键
    */
   pauseLogs() {
     paused = true;
   }
 
   /**
-   * Resumes logging, processing any queued logs.
+   * ▶️ 恢复日志
+   * 就像按下游戏的继续键
    */
   resumeLogs() {
     paused = false;
-
-    // Process queue
+    // 处理队列中的日志
     const _queue = queue.splice(0);
     for (const item of _queue) {
       item[0]._logFn(item[1], item[2]);
@@ -316,19 +339,15 @@ export class Consola {
   }
 
   /**
-   * Replaces logging methods with mocks if a mock function is provided.
-   *
-   * @param {ConsolaOptions["mockFn"]} mockFn - The function to use for mocking logging methods. See {@link ConsolaOptions["mockFn"]}.
+   * 🎭 启用模拟模式
+   * 就像游戏的彩排模式，不会真的显示
    */
   mockTypes(mockFn?: ConsolaOptions["mockFn"]) {
     const _mockFn = mockFn || this.options.mockFn;
-
     this._mockFn = _mockFn;
-
     if (typeof _mockFn !== "function") {
       return;
     }
-
     for (const type in this.options.types) {
       // @ts-expect-error
       (this as unknown as ConsolaInstance)[type as LogType] =
@@ -340,6 +359,10 @@ export class Consola {
     }
   }
 
+  /**
+   * 📝 包装日志函数
+   * 为每种类型的日志创建一个特殊的显示函数
+   */
   _wrapLogFn(defaults: InputLogObject, isRaw?: boolean) {
     return (...args: any[]) => {
       if (paused) {
@@ -350,12 +373,17 @@ export class Consola {
     };
   }
 
+  /**
+   * 📝 处理日志
+   * 真正执行日志显示的核心函数
+   */
   _logFn(defaults: InputLogObject, args: any[], isRaw?: boolean) {
+    // 检查日志级别
     if (((defaults.level as number) || 0) > this.level) {
       return false;
     }
 
-    // Construct a new log object
+    // 创建新的日志对象
     const logObj: Partial<LogObject> = {
       date: new Date(),
       args: [],
@@ -363,14 +391,14 @@ export class Consola {
       level: _normalizeLogLevel(defaults.level, this.options.types),
     };
 
-    // Consume arguments
+    // 处理参数
     if (!isRaw && args.length === 1 && isLogObj(args[0])) {
       Object.assign(logObj, args[0]);
     } else {
       logObj.args = [...args];
     }
 
-    // Aliases
+    // 处理别名
     if (logObj.message) {
       logObj.args!.unshift(logObj.message);
       delete logObj.message;
@@ -379,23 +407,22 @@ export class Consola {
       if (!Array.isArray(logObj.additional)) {
         logObj.additional = logObj.additional.split("\n");
       }
-
       logObj.args!.push("\n" + logObj.additional.join("\n"));
       delete logObj.additional;
     }
 
-    // Normalize type to lowercase
+    // 标准化类型为小写
     logObj.type = (
       typeof logObj.type === "string" ? logObj.type.toLowerCase() : "log"
     ) as LogType;
     logObj.tag = typeof logObj.tag === "string" ? logObj.tag : "";
 
-    // Resolve log
     /**
-     * @param newLog false if the throttle expired and
-     *  we don't want to log a duplicate
+     * 📝 显示日志
+     * @param newLog 是否是新日志
      */
     const resolveLog = (newLog = false) => {
+      // 处理重复的日志
       const repeated = (this._lastLog.count || 0) - this.options.throttleMin;
       if (this._lastLog.object && repeated > 0) {
         const args = [...this._lastLog.object.args];
@@ -406,20 +433,22 @@ export class Consola {
         this._lastLog.count = 1;
       }
 
-      // Log
+      // 显示新日志
       if (newLog) {
         this._lastLog.object = logObj as LogObject;
         this._log(logObj as LogObject);
       }
     };
 
-    // Throttle
+    // 控制重复日志
     clearTimeout(this._lastLog.timeout);
     const diffTime =
       this._lastLog.time && logObj.date
         ? logObj.date.getTime() - this._lastLog.time.getTime()
         : 0;
     this._lastLog.time = logObj.date;
+
+    // 如果时间间隔太短
     if (diffTime < this.options.throttle) {
       try {
         const serializedLog = JSON.stringify([
@@ -432,22 +461,27 @@ export class Consola {
         if (isSameLog) {
           this._lastLog.count = (this._lastLog.count || 0) + 1;
           if (this._lastLog.count > this.options.throttleMin) {
-            // Auto-resolve when throttle is timed out
+            // 自动在节流时间后显示
             this._lastLog.timeout = setTimeout(
               resolveLog,
               this.options.throttle,
             );
-            return; // SPAM!
+            return; // 跳过显示（防止刷屏）
           }
         }
       } catch {
-        // Circular References
+        // 处理循环引用错误
       }
     }
 
+    // 显示日志
     resolveLog(true);
   }
 
+  /**
+   * 📺 显示日志
+   * 通过所有显示器显示日志
+   */
   _log(logObj: LogObject) {
     for (const reporter of this.options.reporters) {
       reporter.log(logObj, {
@@ -457,6 +491,10 @@ export class Consola {
   }
 }
 
+/**
+ * 📊 标准化日志级别
+ * 确保日志级别是一个有效的数字
+ */
 function _normalizeLogLevel(
   input: LogLevel | LogType | undefined,
   types: any = {},
@@ -474,13 +512,22 @@ function _normalizeLogLevel(
   return defaultLevel;
 }
 
+/**
+ * 📝 日志函数类型
+ * 定义了日志函数应该是什么样子
+ */
 export interface LogFn {
   (message: InputLogObject | any, ...args: any[]): void;
   raw: (...args: any[]) => void;
 }
+
+/**
+ * 🎮 Consola实例类型
+ * 组合了Consola类和所有日志类型的函数
+ */
 export type ConsolaInstance = Consola & Record<LogType, LogFn>;
 
-// Legacy support
+// 支持旧版本的函数名
 // @ts-expect-error
 Consola.prototype.add = Consola.prototype.addReporter;
 // @ts-expect-error
@@ -497,10 +544,11 @@ Consola.prototype.pause = Consola.prototype.pauseLogs;
 Consola.prototype.resume = Consola.prototype.resumeLogs;
 
 /**
- * Utility for creating a new Consola instance with optional configuration.
- *
- * @param {Partial<ConsolaOptions>} [options={}] - Optional configuration options for the new Consola instance. See {@link ConsolaOptions}.
- * @returns {ConsolaInstance} A new instance of Consola. See {@link ConsolaInstance}.
+ * 🎮 创建新的Consola实例
+ * 就像买一台新的游戏机
+ * 
+ * @param options 游戏机的配置选项
+ * @returns 一个全新的游戏机实例
  */
 export function createConsola(
   options: Partial<ConsolaOptions> = {},
