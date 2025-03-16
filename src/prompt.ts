@@ -1,28 +1,33 @@
+// 小朋友们，这个文件就像是一个友好的对话助手！
+// 它可以帮助我们和电脑进行各种有趣的对话 🗣️
+
 import { text, confirm, select, multiselect } from "@clack/prompts";
 
+// 这就像是选择题的选项卡片
 type SelectOption = {
-  label: string;
-  value: string;
-  hint?: string;
+  label: string;    // 卡片上显示的文字
+  value: string;    // 卡片代表的答案
+  hint?: string;    // 额外的小提示
 };
 
+// 当我们不想回答问题时的特殊标记
 export const kCancel = Symbol.for("cancel");
 
+// 就像是设置对话的基本规则
 export type PromptCommonOptions = {
   /**
-   * Specify how to handle a cancelled prompt (e.g. by pressing Ctrl+C).
-   *
-   * Default strategy is `"default"`.
-   *
-   * - `"default"` - Resolve the promise with the `default` value or `initial` value.
-   * - `"undefined`" - Resolve the promise with `undefined`.
-   * - `"null"` - Resolve the promise with `null`.
-   * - `"symbol"` - Resolve the promise with a symbol `Symbol.for("cancel")`.
-   * - `"reject"`  - Reject the promise with an error.
+   * 当我们按下Ctrl+C不想继续对话时，该怎么办呢？
+   * 就像是有不同的方式来说"再见"：
+   * - "default" - 用默认的答案代替
+   * - "undefined" - 轻轻地离开，什么都不说
+   * - "null" - 留下一个空白的答案
+   * - "symbol" - 留下一个特殊的标记
+   * - "reject" - 告诉大家我们中断了对话
    */
   cancel?: "reject" | "default" | "undefined" | "null" | "symbol";
 };
 
+// 像是发短信一样，可以输入文字的对话框
 export type TextPromptOptions = PromptCommonOptions & {
   /**
    * Specifies the prompt type as text.
@@ -50,6 +55,7 @@ export type TextPromptOptions = PromptCommonOptions & {
   initial?: string;
 };
 
+// 像是回答"是"或"否"的简单问题
 export type ConfirmPromptOptions = PromptCommonOptions & {
   /**
    * Specifies the prompt type as confirm.
@@ -63,6 +69,7 @@ export type ConfirmPromptOptions = PromptCommonOptions & {
   initial?: boolean;
 };
 
+// 像是从一组选项中选择最喜欢的一个
 export type SelectPromptOptions = PromptCommonOptions & {
   /**
    * Specifies the prompt type as select.
@@ -81,6 +88,7 @@ export type SelectPromptOptions = PromptCommonOptions & {
   options: (string | SelectOption)[];
 };
 
+// 像是在选择多个最喜欢的玩具
 export type MultiSelectOptions = PromptCommonOptions & {
   /**
    * Specifies the prompt type as multiselect.
@@ -103,15 +111,14 @@ export type MultiSelectOptions = PromptCommonOptions & {
   required?: boolean;
 };
 
-/**
- * Defines a combined type for all prompt options.
- */
+// 把所有类型的对话方式都收集在一起
 export type PromptOptions =
   | TextPromptOptions
   | ConfirmPromptOptions
   | SelectPromptOptions
   | MultiSelectOptions;
 
+// 这些是帮助我们理解对话结果的小助手
 type inferPromptReturnType<T extends PromptOptions> =
   T extends TextPromptOptions
     ? string
@@ -140,12 +147,12 @@ type inferPromptCancalReturnType<T extends PromptOptions> = T extends {
           : inferPromptReturnType<T> /* default */;
 
 /**
- * Asynchronously prompts the user for input based on specified options.
- * Supports text, confirm, select and multi-select prompts.
- *
- * @param {string} message - The message to display in the prompt.
- * @param {PromptOptions} [opts={}] - The prompt options. See {@link PromptOptions}.
- * @returns {Promise<inferPromptReturnType<T>>} - A promise that resolves with the user's response, the type of which is inferred from the options. See {@link inferPromptReturnType}.
+ * 这是我们的主要对话功能！就像是一个友好的对话机器人 🤖
+ * 它可以：
+ * - 让你输入文字（像写日记）
+ * - 问你是或否的问题（像选择去不去游乐园）
+ * - 让你从列表中选择（像选择最喜欢的冰淇淋口味）
+ * - 让你选择多个选项（像选择想要的生日礼物）
  */
 export async function prompt<
   _ = any,
@@ -155,6 +162,7 @@ export async function prompt<
   message: string,
   opts: PromptOptions = {},
 ): Promise<inferPromptReturnType<T> | inferPromptCancalReturnType<T>> {
+  // 当对话被中断时，我们需要一个友好的方式来处理它
   const handleCancel = (value: unknown) => {
     if (
       typeof value !== "symbol" ||
@@ -188,6 +196,7 @@ export async function prompt<
     }
   };
 
+  // 根据不同的对话类型，选择合适的方式进行交谈
   if (!opts.type || opts.type === "text") {
     return (await text({
       message,

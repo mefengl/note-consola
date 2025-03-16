@@ -11,18 +11,18 @@
 5. [src/shared.ts](/src/shared.ts) - 共享功能和实用工具
 6. [src/reporters/basic.ts](/src/reporters/basic.ts) - 基础报告器实现
 7. [src/reporters/fancy.ts](/src/reporters/fancy.ts) - 美化报告器实现
-8. [src/reporters/browser.ts](/src/reporters/browser.ts) * - 浏览器报告器实现
-9. [src/utils/log.ts](/src/utils/log.ts) * - 日志相关工具函数
-10. [src/utils/format.ts](/src/utils/format.ts) * - 格式化工具函数
-11. [src/utils/string.ts](/src/utils/string.ts) * - 字符串处理工具
-12. [src/utils/color.ts](/src/utils/color.ts) * - 颜色处理工具
-13. [src/utils/stream.ts](/src/utils/stream.ts) * - 流处理工具
-14. [src/utils/error.ts](/src/utils/error.ts) * - 错误处理工具
-15. [src/utils/tree.ts](/src/utils/tree.ts) * - 树形结构工具
-16. [src/utils/box.ts](/src/utils/box.ts) * - 框框绘制工具
-17. [src/browser.ts](/src/browser.ts) * - 浏览器相关功能
-18. [src/basic.ts](/src/basic.ts) * - 基础功能实现
-19. [src/core.ts](/src/core.ts) * - 核心功能实现
+8. [src/reporters/browser.ts](/src/reporters/browser.ts) - 浏览器报告器实现
+9. [src/utils/log.ts](/src/utils/log.ts) - 日志相关工具函数
+10. [src/utils/format.ts](/src/utils/format.ts) - 格式化工具函数
+11. [src/utils/string.ts](/src/utils/string.ts) - 字符串处理工具
+12. [src/utils/color.ts](/src/utils/color.ts) - 颜色处理工具
+13. [src/utils/stream.ts](/src/utils/stream.ts) - 流处理工具
+14. [src/utils/error.ts](/src/utils/error.ts) - 错误处理工具
+15. [src/utils/tree.ts](/src/utils/tree.ts) - 树形结构工具
+16. [src/utils/box.ts](/src/utils/box.ts) - 框框绘制工具
+17. [src/browser.ts](/src/browser.ts) - 浏览器相关功能
+18. [src/basic.ts](/src/basic.ts) - 基础功能实现
+19. [src/core.ts](/src/core.ts) - 核心功能实现
 20. [src/prompt.ts](/src/prompt.ts) * - 交互式提示功能实现
 21. [src/utils.ts](/src/utils.ts) * - 工具函数集合
 
