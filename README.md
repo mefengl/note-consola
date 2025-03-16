@@ -1,5 +1,31 @@
 # 🐨 Consola
 
+# 代码阅读推荐顺序
+
+> 按照以下顺序阅读源码，可以更好地理解consola的设计思路和实现方式
+
+1. [src/types.ts](/src/types.ts) - 核心类型定义，了解项目的数据结构
+2. [src/constants.ts](/src/constants.ts) - 常量定义，包括日志级别和类型
+3. [src/consola.ts](/src/consola.ts) * - 核心类，实现了主要的日志功能
+4. [src/index.ts](/src/index.ts) * - 主入口文件，提供公共API
+5. [src/shared.ts](/src/shared.ts) * - 共享功能和实用工具
+6. [src/reporters/basic.ts](/src/reporters/basic.ts) * - 基础报告器实现
+7. [src/reporters/fancy.ts](/src/reporters/fancy.ts) * - 美化报告器实现
+8. [src/reporters/browser.ts](/src/reporters/browser.ts) * - 浏览器报告器实现
+9. [src/utils/log.ts](/src/utils/log.ts) * - 日志相关工具函数
+10. [src/utils/format.ts](/src/utils/format.ts) * - 格式化工具函数
+11. [src/utils/string.ts](/src/utils/string.ts) * - 字符串处理工具
+12. [src/utils/color.ts](/src/utils/color.ts) * - 颜色处理工具
+13. [src/utils/stream.ts](/src/utils/stream.ts) * - 流处理工具
+14. [src/utils/error.ts](/src/utils/error.ts) * - 错误处理工具
+15. [src/utils/tree.ts](/src/utils/tree.ts) * - 树形结构工具
+16. [src/utils/box.ts](/src/utils/box.ts) * - 框框绘制工具
+17. [src/browser.ts](/src/browser.ts) * - 浏览器相关功能
+18. [src/basic.ts](/src/basic.ts) * - 基础功能实现
+19. [src/core.ts](/src/core.ts) * - 核心功能实现
+20. [src/prompt.ts](/src/prompt.ts) * - 交互式提示功能实现
+21. [src/utils.ts](/src/utils.ts) * - 工具函数集合
+
 > Elegant Console Wrapper
 
 [![npm version][npm-version-src]][npm-version-href]
@@ -346,7 +372,5 @@ MIT
 [npm-version-href]: https://npmjs.com/package/consola
 [npm-downloads-src]: https://img.shields.io/npm/dm/consola?style=flat&colorA=18181B&colorB=F0DB4F
 [npm-downloads-href]: https://npmjs.com/package/consola
-[codecov-src]: https://img.shields.io/codecov/c/gh/unjs/consola/main?style=flat&colorA=18181B&colorB=F0DB4F
-[codecov-href]: https://codecov.io/gh/unjs/consola
 [bundle-src]: https://img.shields.io/bundlephobia/min/consola?style=flat&colorA=18181B&colorB=F0DB4F
 [bundle-href]: https://bundlephobia.com/result?p=consola
