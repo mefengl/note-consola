@@ -23,8 +23,8 @@
 17. [src/browser.ts](/src/browser.ts) - 浏览器相关功能
 18. [src/basic.ts](/src/basic.ts) - 基础功能实现
 19. [src/core.ts](/src/core.ts) - 核心功能实现
-20. [src/prompt.ts](/src/prompt.ts) * - 交互式提示功能实现
-21. [src/utils.ts](/src/utils.ts) * - 工具函数集合
+20. [src/prompt.ts](/src/prompt.ts) - 交互式提示功能实现
+21. [src/utils.ts](/src/utils.ts) - 工具函数集合
 
 > Elegant Console Wrapper
 
